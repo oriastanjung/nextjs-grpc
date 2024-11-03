@@ -1,0 +1,21 @@
+syntax="proto3";
+
+package books;
+
+option go_package="github.com/oriastanjung/server_grpc";
+import "google/protobuf/empty.proto";
+
+message Book{
+    uint64 id = 1;
+    string title = 2;
+    string description=3;
+}
+
+message BookList{
+    repeated Book books=1;
+}
+
+
+service BookServiceRoutes{
+    rpc GetAllBooks(google.protobuf.Empty) returns (BookList) {};
+}
