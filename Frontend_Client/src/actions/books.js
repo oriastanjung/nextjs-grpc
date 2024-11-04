@@ -16,3 +16,10 @@ export async function callGetAllBooks() {
     });
   });
 }
+
+
+export async function callGetAllBooksLive(onBookReceived){
+  const request = new Empty()
+  const stream = client.getAllBooksLive(request)
+  return stream
+}

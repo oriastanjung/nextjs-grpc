@@ -18,4 +18,5 @@ message BookList{
 
 service BookServiceRoutes{
     rpc GetAllBooks(google.protobuf.Empty) returns (BookList) {};
+    rpc GetAllBooksLive(stream google.protobuf.Empty) returns (stream BookList) {};
 }

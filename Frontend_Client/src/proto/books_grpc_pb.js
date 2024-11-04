@@ -40,6 +40,17 @@ var BookServiceRoutesService = exports.BookServiceRoutesService = {
     responseSerialize: serialize_books_BookList,
     responseDeserialize: deserialize_books_BookList,
   },
+  getAllBooksLive: {
+    path: '/books.BookServiceRoutes/GetAllBooksLive',
+    requestStream: true,
+    responseStream: true,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: books_pb.BookList,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_books_BookList,
+    responseDeserialize: deserialize_books_BookList,
+  },
 };
 
 exports.BookServiceRoutesClient = grpc.makeGenericClientConstructor(BookServiceRoutesService);

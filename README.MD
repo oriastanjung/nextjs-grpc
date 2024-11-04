@@ -61,3 +61,19 @@ Start the Next.js development server and access the application in the browser.
 - **Environment Variables**: Update server addresses and ports as needed.
 - **Error Handling**: Ensure to add error handling for production use.
 - **Testing**: Test each action and method separately to verify correct communication.
+
+
+### compiling in golang
+protoc -InamaFolder/namaProto --go_out=. --go_opt=module=namaModule --go-grpc_out=. --go-grpc_opt=module=namaModule namaFolder/folderProto/namaFile.proto
+
+
+### compiling in js
+
+npm install @grpc/grpc-js
+npm install google-protobuf
+npm install -g grpc-tools
+
+grpc_tools_node_protoc -I=./src/proto \
+  --js_out=import_style=commonjs,binary:./src/proto \
+  --grpc_out=grpc_js:./src/proto \
+  ./src/proto/books.proto

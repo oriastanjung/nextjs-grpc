@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.28.3
-// source: proto/books.proto
+// source: books.proto
 
 package server_grpc
 
@@ -20,7 +20,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BookServiceRoutes_GetAllBooks_FullMethodName = "/books.BookServiceRoutes/GetAllBooks"
+	BookServiceRoutes_GetAllBooks_FullMethodName     = "/books.BookServiceRoutes/GetAllBooks"
+	BookServiceRoutes_GetAllBooksLive_FullMethodName = "/books.BookServiceRoutes/GetAllBooksLive"
 )
 
 // BookServiceRoutesClient is the client API for BookServiceRoutes service.
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BookServiceRoutesClient interface {
 	GetAllBooks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*BookList, error)
+	GetAllBooksLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[emptypb.Empty, BookList], error)
 }
 
 type bookServiceRoutesClient struct {
@@ -48,11 +50,25 @@ func (c *bookServiceRoutesClient) GetAllBooks(ctx context.Context, in *emptypb.E
 	return out, nil
 }
 
+func (c *bookServiceRoutesClient) GetAllBooksLive(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[emptypb.Empty, BookList], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &BookServiceRoutes_ServiceDesc.Streams[0], BookServiceRoutes_GetAllBooksLive_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[emptypb.Empty, BookList]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BookServiceRoutes_GetAllBooksLiveClient = grpc.BidiStreamingClient[emptypb.Empty, BookList]
+
 // BookServiceRoutesServer is the server API for BookServiceRoutes service.
 // All implementations must embed UnimplementedBookServiceRoutesServer
 // for forward compatibility.
 type BookServiceRoutesServer interface {
 	GetAllBooks(context.Context, *emptypb.Empty) (*BookList, error)
+	GetAllBooksLive(grpc.BidiStreamingServer[emptypb.Empty, BookList]) error
 	mustEmbedUnimplementedBookServiceRoutesServer()
 }
 
@@ -65,6 +81,9 @@ type UnimplementedBookServiceRoutesServer struct{}
 
 func (UnimplementedBookServiceRoutesServer) GetAllBooks(context.Context, *emptypb.Empty) (*BookList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllBooks not implemented")
+}
+func (UnimplementedBookServiceRoutesServer) GetAllBooksLive(grpc.BidiStreamingServer[emptypb.Empty, BookList]) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllBooksLive not implemented")
 }
 func (UnimplementedBookServiceRoutesServer) mustEmbedUnimplementedBookServiceRoutesServer() {}
 func (UnimplementedBookServiceRoutesServer) testEmbeddedByValue()                           {}
@@ -105,6 +124,13 @@ func _BookServiceRoutes_GetAllBooks_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BookServiceRoutes_GetAllBooksLive_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BookServiceRoutesServer).GetAllBooksLive(&grpc.GenericServerStream[emptypb.Empty, BookList]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type BookServiceRoutes_GetAllBooksLiveServer = grpc.BidiStreamingServer[emptypb.Empty, BookList]
+
 // BookServiceRoutes_ServiceDesc is the grpc.ServiceDesc for BookServiceRoutes service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -117,6 +143,13 @@ var BookServiceRoutes_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BookServiceRoutes_GetAllBooks_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/books.proto",
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetAllBooksLive",
+			Handler:       _BookServiceRoutes_GetAllBooksLive_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "books.proto",
 }
